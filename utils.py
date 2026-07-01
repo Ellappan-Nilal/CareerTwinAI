@@ -20,7 +20,7 @@ def get_api_key() -> str:
     return st.session_state.get("gemini_api_key") or os.environ.get("GEMINI_API_KEY", "")
 
 
-def call_ai(system_prompt: str, user_prompt: str, model: str = "gemini-1.5-flash",
+def call_ai(system_prompt: str, user_prompt: str, model: str = "gemini-1.5-flash-latest",
             temperature: float = 0.6, json_mode: bool = False) -> str:
     """Single wrapper for all chat completion calls used across modules."""
     api_key = get_api_key()
