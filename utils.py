@@ -1,13 +1,13 @@
 """
 utils.py
-Shared helpers: OpenAI client setup, JSON-safe parsing, PDF text extraction.
+Shared helpers: Gemini API client setup, JSON-safe parsing, PDF text extraction.
 """
 
 import os
 import json
 import re
 import streamlit as st
-from openai import OpenAI
+import google.generativeai as genai
 
 try:
     from PyPDF2 import PdfReader
@@ -17,33 +17,32 @@ except ImportError:
 
 def get_api_key() -> str:
     """Priority: session state (user-entered in sidebar) > env var."""
-    return st.session_state.get("openai_api_key") or os.environ.get("OPENAI_API_KEY", "")
+    return st.session_state.get("gemini_api_key") or os.environ.get("GEMINI_API_KEY", "")
 
 
-def get_client() -> OpenAI:
-    api_key = get_api_key()
-    if not api_key:
-        raise ValueError("No OpenAI API key set. Add it in the sidebar.")
-    return OpenAI(api_key=api_key)
-
-
-def call_ai(system_prompt: str, user_prompt: str, model: str = "gpt-4o-mini",
+def call_ai(system_prompt: str, user_prompt: str, model: str = "gemini-1.5-flash",
             temperature: float = 0.6, json_mode: bool = False) -> str:
     """Single wrapper for all chat completion calls used across modules."""
-    client = get_client()
-    kwargs = {
-        "model": model,
+    api_key = get_api_key()
+    if not api_key:
+        raise ValueError("No Gemini API key set. Add it in the sidebar.")
+    
+    genai.configure(api_key=api_key)
+    
+    generation_config = {
         "temperature": temperature,
-        "messages": [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
-        ],
     }
     if json_mode:
-        kwargs["response_format"] = {"type": "json_object"}
-
-    response = client.chat.completions.create(**kwargs)
-    return response.choices[0].message.content
+        generation_config["response_mime_type"] = "application/json"
+        
+    client = genai.GenerativeModel(
+        model_name=model,
+        system_instruction=system_prompt,
+        generation_config=generation_config
+    )
+    
+    response = client.generate_content(user_prompt)
+    return response.text
 
 
 def safe_json_parse(text: str, fallback=None):

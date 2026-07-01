@@ -22,8 +22,8 @@ db.init_db()
 
 if "user_id" not in st.session_state:
     st.session_state.user_id = None
-if "openai_api_key" not in st.session_state:
-    st.session_state.openai_api_key = ""
+if "gemini_api_key" not in st.session_state:
+    st.session_state.gemini_api_key = ""
 if "interview_qa_log" not in st.session_state:
     st.session_state.interview_qa_log = []  # current session's questions (avoid repeats)
 if "current_question" not in st.session_state:
@@ -35,8 +35,8 @@ with st.sidebar:
     st.caption("Your Personal Career Mentor")
 
     st.subheader("Setup")
-    api_key_input = st.text_input("OpenAI API Key", type="password", value=st.session_state.openai_api_key)
-    st.session_state.openai_api_key = api_key_input
+    api_key_input = st.text_input("Gemini API Key", type="password", value=st.session_state.gemini_api_key)
+    st.session_state.gemini_api_key = api_key_input
 
     st.divider()
     st.subheader("Your Profile")
@@ -69,8 +69,8 @@ if not st.session_state.user_id:
     st.info("👈 Enter your name and email in the sidebar, then click **Login / Continue** to get started.")
     st.stop()
 
-if not st.session_state.openai_api_key:
-    st.warning("👈 Add your OpenAI API key in the sidebar to unlock AI features.")
+if not st.session_state.gemini_api_key:
+    st.warning("👈 Add your Gemini API key in the sidebar to unlock AI features.")
 
 user_id = st.session_state.user_id
 
