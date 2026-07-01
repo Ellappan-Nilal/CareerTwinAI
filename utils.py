@@ -20,7 +20,7 @@ def get_api_key() -> str:
     return st.session_state.get("gemini_api_key") or os.environ.get("GEMINI_API_KEY", "")
 
 
-def call_ai(system_prompt: str, user_prompt: str, model: str = "gemini-pro",
+def call_ai(system_prompt: str, user_prompt: str, model: str = "gemini-1.5-flash",
             temperature: float = 0.6, json_mode: bool = False) -> str:
     """Single wrapper for all chat completion calls used across modules."""
     api_key = get_api_key()
@@ -32,17 +32,16 @@ def call_ai(system_prompt: str, user_prompt: str, model: str = "gemini-pro",
     generation_config = {
         "temperature": temperature,
     }
+    if json_mode:
+        generation_config["response_mime_type"] = "application/json"
         
     client = genai.GenerativeModel(
         model_name=model,
+        system_instruction=system_prompt,
         generation_config=generation_config
     )
     
-    # Gemini 1.0 (gemini-pro) does not natively support system_instruction
-    # so we combine the system prompt and user prompt manually.
-    combined_prompt = f"System Instructions:\n{system_prompt}\n\nUser Request:\n{user_prompt}"
-    
-    response = client.generate_content(combined_prompt)
+    response = client.generate_content(user_prompt)
     return response.text
 
 
