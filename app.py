@@ -21,33 +21,18 @@ st.set_page_config(page_title="CareerTwin AI", page_icon="🎯", layout="wide")
 db.init_db()
 
 if "user_id" not in st.session_state:
-    st.session_state.user_id = None
-if "gemini_api_key" not in st.session_state:
-    st.session_state.gemini_api_key = ""
+    # Auto-login as Guest so users don't have to login manually
+    st.session_state.user_id = db.create_or_get_user("Guest", "guest@careertwin.ai")
+    
 if "interview_qa_log" not in st.session_state:
     st.session_state.interview_qa_log = []  # current session's questions (avoid repeats)
 if "current_question" not in st.session_state:
     st.session_state.current_question = None
 
-# ---------------- Sidebar: login + API key ----------------
+# ---------------- Sidebar ----------------
 with st.sidebar:
     st.title("🎯 CareerTwin AI")
     st.caption("Your Personal Career Mentor")
-
-    st.subheader("Setup")
-    api_key_input = st.text_input("Gemini API Key", type="password", value=st.session_state.gemini_api_key)
-    st.session_state.gemini_api_key = api_key_input
-
-    st.divider()
-    st.subheader("Your Profile")
-    name = st.text_input("Name", key="input_name")
-    email = st.text_input("Email", key="input_email")
-    if st.button("Login / Continue", use_container_width=True):
-        if name and email:
-            st.session_state.user_id = db.create_or_get_user(name, email)
-            st.success(f"Welcome, {name}!")
-        else:
-            st.warning("Enter both name and email.")
 
     st.divider()
     page = st.radio(
@@ -63,14 +48,6 @@ with st.sidebar:
             "8. Progress Dashboard",
         ],
     )
-
-# ---------------- Guard: require login ----------------
-if not st.session_state.user_id:
-    st.info("👈 Enter your name and email in the sidebar, then click **Login / Continue** to get started.")
-    st.stop()
-
-if not st.session_state.gemini_api_key:
-    st.warning("👈 Add your Gemini API key in the sidebar to unlock AI features.")
 
 user_id = st.session_state.user_id
 

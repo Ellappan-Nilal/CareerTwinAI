@@ -16,8 +16,11 @@ except ImportError:
 
 
 def get_api_key() -> str:
-    """Priority: session state (user-entered in sidebar) > env var."""
-    return st.session_state.get("gemini_api_key") or os.environ.get("GEMINI_API_KEY", "")
+    """Priority: Streamlit secrets > env var. No longer reads from UI."""
+    try:
+        return st.secrets["GEMINI_API_KEY"]
+    except Exception:
+        return os.environ.get("GEMINI_API_KEY", "")
 
 
 def call_ai(system_prompt: str, user_prompt: str, model: str = "gemini-flash-latest",
